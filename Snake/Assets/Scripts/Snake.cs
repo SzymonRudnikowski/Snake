@@ -14,7 +14,7 @@ public class Snake : MonoBehaviour
 
     [Range(0.5f, 10f)]
     public float speed = 3f;
-
+    public bool canMove = true;
     public MoveMode moveMode = MoveMode.MODE_2_WAY;
 
     private Vector2Int gridMoveCurrentDirection;
@@ -27,7 +27,7 @@ public class Snake : MonoBehaviour
     private float gridMoveTimer;
     //Czas w sekundach pomiedzy ruchami, 1/speed
     private float gridMoveTimeInterval;
-   
+
     private void Awake()
     {
         gridPosition = new Vector2Int(0, 0);
@@ -39,7 +39,7 @@ public class Snake : MonoBehaviour
 
     private void Update()
     {
-        if(moveMode == MoveMode.MODE_2_WAY)
+        if (moveMode == MoveMode.MODE_2_WAY)
         {
             HandleInput2Way();
         }
@@ -47,7 +47,7 @@ public class Snake : MonoBehaviour
         {
             HandleInput4Way();
         }
-        
+
         HandleGridMovement();
     }
 
@@ -96,11 +96,11 @@ public class Snake : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            if (gridMoveCurrentDirection.y ==1)
+            if (gridMoveCurrentDirection.y == 1)
             {
                 gridMoveNextDirection.x = 1;
                 gridMoveNextDirection.y = 0;
-            } 
+            }
             else if (gridMoveCurrentDirection.y == -1)
             {
                 gridMoveNextDirection.x = -1;
@@ -144,21 +144,31 @@ public class Snake : MonoBehaviour
 
     private void HandleGridMovement()
     {
+        if (!canMove)
+        {
+            return;
+        }
+
         gridMoveTimer += Time.deltaTime;
         if (gridMoveTimer >= gridMoveTimeInterval)
         {
-            // 1. odzyskujemy pierwsze dziecko obiektu Snake
-            
+            // 1. odzyskujemy ostatnie dziecko obiektu Snake
+            int lastone = transform.childCount - 1;
+            var lastchild = transform.GetChild(lastone);
+
             // 2. przesuwamy wynik z 1. na miejsce glowy
+            var head = transform.GetChild(0);
+            lastchild.position = head.position;
 
             // 3. updatujemy hierarchie - przesuwamy wynik z 1. na 2 !!! miejsce
-             //transform.SetSiblingIndex
+            //transform.SetSiblingIndex
+            lastchild.SetSiblingIndex(1);
 
             // 4. przesuwamy glowe - czyli to co juz mamy ponizej
             gridMoveTimer -= gridMoveTimeInterval;
             gridPosition += gridMoveNextDirection;
             gridMoveCurrentDirection = gridMoveNextDirection;
-            transform.position = new Vector3(gridPosition.x, gridPosition.y);
+            head.position = new Vector3(gridPosition.x, gridPosition.y);
         }
 
     }
